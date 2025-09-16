@@ -66,14 +66,24 @@ export default function AdminClaimsPage() {
       return;
     }
 
-    if (newStatus === "approved" && itemId) {
-      const { error: itemError } = await supabase
-        .from("found-items")
-        .update({ status: "claimed" })
-        .eq("id", itemId);
+    if (itemId) {
+      let itemStatus = null;
 
-      if (itemError) {
-        console.error("Error updating found item status:", itemError);
+      if (newStatus === "approved") {
+        itemStatus = "claimed";
+      } else if (newStatus === "rejected") {
+        itemStatus = "submitted";
+      }
+
+      if (itemStatus) {
+        const { error: itemError } = await supabase
+          .from("found-items")
+          .update({ status: itemStatus })
+          .eq("id", itemId);
+
+        if (itemError) {
+          console.error("Error updating found item status:", itemError);
+        }
       }
     }
 

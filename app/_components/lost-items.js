@@ -155,6 +155,13 @@ export default function LostItemsPage() {
                         >
                           Already Claimed
                         </button>
+                      ) : item.status === "claim submitted" ? (
+                        <button
+                          disabled
+                          className="w-full bg-yellow-200 text-yellow-700 py-2 px-4 rounded-xl font-medium cursor-not-allowed"
+                        >
+                          Claim In Progress
+                        </button>
                       ) : (
                         <button
                           onClick={() => handleClaimClick(item.id)}

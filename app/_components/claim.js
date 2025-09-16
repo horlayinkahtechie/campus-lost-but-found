@@ -252,7 +252,7 @@ export default function ClaimPage() {
 
       purchaseReceiptImageUrl = receiptData.publicUrl;
       // Save claim record
-      const { error } = await supabase.from("claims").insert([
+      const { error: claimError } = await supabase.from("claims").insert([
         {
           item_id: id,
           claimant_email: session.user.email,
@@ -266,39 +266,51 @@ export default function ClaimPage() {
         },
       ]);
 
-      if (error) {
-        console.error("Error submitting claim:", error);
+      if (claimError) {
+        console.error("Error submitting claim:", claimError);
         setMessage("Failed to submit claim. Please try again.");
       } else {
-        setMessage(
-          "Your claim has been submitted successfully! The admin will review it and contact you."
-        );
-        // Reset form
-        setDetails("");
-        setItemFiles([]);
-        setItemPreviews([]);
-        setClaimantFile(null);
-        setPurchaseReceipt(null);
-        setClaimantPreview(null);
-        setPurchaseReceiptPreview(null);
-        setItemInfo({
-          imei: "",
-          frequentNumber1: "",
-          frequentNumber2: "",
-          simName: "",
-          simNumber: "",
-          serialNumber: "",
-          recentWebsite: "",
-          signedUpEmail: "",
-          brand: "",
-          model: "",
-          watchSerialImei: "",
-          uniqueFeatures: "",
-          purchaseDate: "",
-          lastLocation: "",
-        });
+        // Update found-items status
+        const { error: updateError } = await supabase
+          .from("found-items")
+          .update({ status: "claim submitted" })
+          .eq("id", id);
 
-        setTimeout(() => router.push("/"), 5000);
+        if (updateError) {
+          console.error("Error updating found-items:", updateError);
+          setMessage("Claim submitted, but failed to update item status.");
+        } else {
+          setMessage(
+            "Your claim has been submitted successfully! The admin will review it and contact you."
+          );
+
+          // Reset form
+          setDetails("");
+          setItemFiles([]);
+          setItemPreviews([]);
+          setClaimantFile(null);
+          setPurchaseReceipt(null);
+          setClaimantPreview(null);
+          setPurchaseReceiptPreview(null);
+          setItemInfo({
+            imei: "",
+            frequentNumber1: "",
+            frequentNumber2: "",
+            simName: "",
+            simNumber: "",
+            serialNumber: "",
+            recentWebsite: "",
+            signedUpEmail: "",
+            brand: "",
+            model: "",
+            watchSerialImei: "",
+            uniqueFeatures: "",
+            purchaseDate: "",
+            lastLocation: "",
+          });
+
+          setTimeout(() => router.push("/"), 5000);
+        }
       }
     } catch (error) {
       console.error("Unexpected error:", error);
