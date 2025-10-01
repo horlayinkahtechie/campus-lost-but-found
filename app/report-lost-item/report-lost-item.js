@@ -17,7 +17,7 @@ export default function ReportLost() {
     itemName: "",
     pictures: [],
     proof: null,
-    reporterName: session?.user?.name || "",
+    reporterName: "",
     reporterPhone: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +30,15 @@ export default function ReportLost() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+  if (session?.user?.name) {
+    setFormData((prev) => ({
+      ...prev,
+      reporterName: session.user.name,
+    }));
+  }
+}, [session]);
 
   // Handle lost item pictures (1–3 files)
   const handlePicturesChange = (e) => {
