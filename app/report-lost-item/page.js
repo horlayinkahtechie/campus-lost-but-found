@@ -1,5 +1,5 @@
-import ReportLost from "../_components/report-lost-item";
+import ReportLost from "./report-lost-item";
 
 export default function Page() {
-  return <ReportLost />;
+  return <ReportLost/>;
 }
