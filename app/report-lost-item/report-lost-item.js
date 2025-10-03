@@ -142,8 +142,8 @@ export default function ReportLost() {
   if (!session) {
     return (
       <div className="flex items-center justify-center h-screen text-center">
-        <p className="text-gray-700 text-lg">
-          Please log in with your Google account to report a lost item.
+        <p className="text-white text-lg">
+          Please <Link href="/user/signin" className="underline">log in</Link>  with your Google account to report a lost item.
         </p>
       </div>
     );

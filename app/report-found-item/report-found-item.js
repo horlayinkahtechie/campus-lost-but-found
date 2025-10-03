@@ -112,6 +112,16 @@ export default function ReportFound() {
     }
   };
 
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center h-screen text-center">
+        <p className="text-white text-lg">
+          Please <Link href="/user/signin" className="underline">log in</Link>  with your Google account to report a lost item.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50">
       <Head>
