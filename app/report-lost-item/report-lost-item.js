@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabaseClient";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+export const dynamic = "force-dynamic";
 
 export default function ReportLost() {
   const { data: session, error } = useSession();
@@ -22,30 +23,28 @@ export default function ReportLost() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
-  // const [imagePreview, setImagePreview] = useState(null);
   const [imagePreview, setImagePreview] = useState([]);
   const [proofPreview, setProofPreview] = useState(null);
+
+  
+  useEffect(() => {
+    if (session?.user?.name) {
+      setFormData((prev) => ({
+        ...prev,
+        reporterName: session.user.name,
+      }));
+    }
+  }, [session]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  useEffect(() => {
-  if (session?.user?.name) {
-    setFormData((prev) => ({
-      ...prev,
-      reporterName: session.user.name,
-    }));
-  }
-}, [session]);
-
-  // Handle lost item pictures (1–3 files)
   const handlePicturesChange = (e) => {
     const files = Array.from(e.target.files).slice(0, 3);
     setFormData((prev) => ({ ...prev, pictures: files }));
 
-    // Previews
     const previews = files.map((file) => URL.createObjectURL(file));
     setImagePreview(previews);
   };
@@ -53,37 +52,37 @@ export default function ReportLost() {
   const handleProofChange = (e) => {
     const file = e.target.files[0];
     setFormData((prev) => ({ ...prev, proof: file }));
-    if (file) {
-      setProofPreview(URL.createObjectURL(file));
-    } else {
-      setProofPreview(null);
-    }
+    setProofPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 🚫 Block submission if user is not logged in
+    if (!session) {
+      alert("You must be logged in to submit a report.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Upload pictures
       let pictureUrls = [];
+
       for (const file of formData.pictures) {
         const ext = file.name.split(".").pop();
         const fileName = `lost-items/${Date.now()}-${Math.random()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("lost-item-images")
           .upload(fileName, file);
-
         if (uploadError) throw uploadError;
 
         const { data } = supabase.storage
           .from("lost-item-images")
           .getPublicUrl(fileName);
-
         pictureUrls.push(data.publicUrl);
       }
 
-      // Upload proof
       let proofUrl = null;
       if (formData.proof) {
         const ext = formData.proof.name.split(".").pop();
@@ -91,17 +90,14 @@ export default function ReportLost() {
         const { error: uploadError } = await supabase.storage
           .from("lost-item-images")
           .upload(fileName, formData.proof);
-
         if (uploadError) throw uploadError;
 
         const { data } = supabase.storage
           .from("lost-item-images")
           .getPublicUrl(fileName);
-
         proofUrl = data.publicUrl;
       }
 
-      // Insert lost item record
       const { error } = await supabase.from("lost-items").insert([
         {
           item_name: formData.itemName,
@@ -120,9 +116,7 @@ export default function ReportLost() {
 
       if (error) throw error;
 
-      setSubmitMessage(
-        "Your lost item report has been submitted successfully!"
-      );
+      setSubmitMessage("Your lost item report has been submitted successfully!");
       setFormData({
         itemName: "",
         itemType: "",
@@ -138,13 +132,22 @@ export default function ReportLost() {
       setProofPreview(null);
     } catch (err) {
       console.error("Error submitting form:", err);
-      setSubmitMessage(
-        "There was an error submitting your report. Please try again."
-      );
+      setSubmitMessage("There was an error submitting your report. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // 🧭 Display login message if user not logged in
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center h-screen text-center">
+        <p className="text-gray-700 text-lg">
+          Please log in with your Google account to report a lost item.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50">
