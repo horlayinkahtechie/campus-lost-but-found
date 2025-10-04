@@ -116,7 +116,7 @@ export default function ReportFound() {
     return (
       <div className="flex items-center justify-center h-screen text-center">
         <p className="text-white text-lg">
-          Please <Link href="/user/signin" className="underline">log in</Link>  with your Google account to report a lost item.
+          Please <Link href="/user/signin" className="underline">log in</Link>  with your Google account to report a found item.
         </p>
       </div>
     );
