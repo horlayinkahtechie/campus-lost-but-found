@@ -68,10 +68,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
         <p>
           © {new Date().getFullYear()} Campus Lost & Found System. All rights
-          reserved. Developed by{" "}
-          <Link href="https://abdulsalamalao.com" className="underline">
-            Abdul-salam
-          </Link>
+          reserved. Developed by{" "} GROUP 13
         </p>
       </div>
     </footer>
